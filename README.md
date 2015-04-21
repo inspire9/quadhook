@@ -18,7 +18,10 @@ gem 'quadhook', '~> 0.0.1'
 Mount an instance of `Quadhook::Endpoint` to your preferred route. In a Rails app, that'd look something like this:
 
 ```ruby
-post '/quaderno/webhook', to: Quaderno::Endpoint.new(ENV['QUADERNO_API_KEY'])
+post '/quaderno/webhook', to: Quaderno::Endpoint.new(
+  ENV['QUADERNO_AUTH_KEY'],
+  ENV['QUADERNO_HOOK_URI']
+)
 ```
 
 Then, handle the notifications using something like the following (which would probably go in an initialiser for a Rails app):
