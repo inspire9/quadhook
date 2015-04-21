@@ -1,0 +1,3 @@
+module Quadhook
+  #
+end
