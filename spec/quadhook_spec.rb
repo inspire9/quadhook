@@ -57,7 +57,7 @@ RSpec.describe 'Quadhook Notifications' do
     subscribe { |*args|
       event = ActiveSupport::Notifications::Event.new *args
       expect(event.payload[:event_type]).to eq('test')
-      expect(event.payload[:data]).to eq([{'foo' => 'bar'}])
+      expect(event.payload[:data]).to eq({'foo' => 'bar'})
     }
 
     post_with_hmac '/', event_type: "test", data: {foo: "bar"}

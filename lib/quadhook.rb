@@ -8,3 +8,6 @@ require 'active_support/core_ext/module/delegation'
 module Quadhook
   #
 end
+
+require 'quadhook/endpoint'
+require 'quadhook/verifier'
