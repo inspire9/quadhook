@@ -3,6 +3,8 @@ require 'spec_helper'
 RSpec.describe 'Quadhook Notifications' do
   include Rack::Test::Methods
 
+  DIGEST = OpenSSL::Digest.new('sha1')
+
   let(:app)           { Quadhook::Endpoint.new 'SUPERSECRET', 'uri' }
   let(:subscriptions) { [] }
 
@@ -12,23 +14,17 @@ RSpec.describe 'Quadhook Notifications' do
     )
   end
 
-  def hmac_for(params)
-    query_string = Rack::Utils.build_nested_query params
-    flat_params  = Rack::Utils.parse_query query_string
-    prehashed_string = flat_params.keys.sort.inject('uri') do |string, key|
-      string << key << flat_params[key]
-    end
+  def hmac_for(body)
+    payload = JSON.parse(body).sort.flatten.join
 
     Base64.encode64(
-      OpenSSL::HMAC.digest(
-        OpenSSL::Digest.new('sha1'), 'SUPERSECRET', prehashed_string
-      )
+      OpenSSL::HMAC.digest(DIGEST, 'SUPERSECRET', "uri#{payload}")
     ).strip
   end
 
-  def post_with_hmac(path, params = {}, headers = {})
-    post path, params, headers.merge(
-      'HTTP_X_QUADERNO_SIGNATURE' => hmac_for(params)
+  def post_with_hmac(path, body = '{"foo":"bar"}', headers = {})
+    post path, body, headers.merge(
+      'HTTP_X_QUADERNO_SIGNATURE' => hmac_for(body)
     )
   end
 
@@ -60,11 +56,12 @@ RSpec.describe 'Quadhook Notifications' do
       expect(event.payload[:data]).to eq({'foo' => 'bar'})
     }
 
-    post_with_hmac '/', event_type: "test", data: {foo: "bar"}
+    post_with_hmac '/', {event_type: "test", data: {foo: "bar"}}.to_json
   end
 
   it 'accepts a dashed HMAC header' do
-    post '/', {}, {'X-Quaderno-Signature' => hmac_for({})}
+    post '/', '{"foo":"bar"}',
+      {'X-Quaderno-Signature' => hmac_for('{"foo":"bar"}')}
 
     expect(last_response.status).to eq(200)
   end

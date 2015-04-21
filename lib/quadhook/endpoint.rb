@@ -9,11 +9,11 @@ class Quadhook::Endpoint
     request = Rack::Request.new env
 
     if Quadhook::Verifier.new(request, api_key, uri).call
-      request.body.rewind
+      json = json_from_body request
 
       instrument 'notification.quadhook.webhook',
-        event_type: request.params['event_type'],
-        data:       request.params['data']
+        event_type: json['event_type'],
+        data:       json['data']
 
       [200, {}, ['']]
     else
@@ -24,4 +24,10 @@ class Quadhook::Endpoint
   private
 
   attr_reader :api_key, :uri
+
+  def json_from_body(request)
+    request.body.rewind
+
+    JSON.parse request.body.read
+  end
 end

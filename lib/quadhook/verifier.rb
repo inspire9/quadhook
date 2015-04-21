@@ -17,9 +17,7 @@ class Quadhook::Verifier
   end
 
   def data
-    params.keys.sort.inject(uri) do |string, key|
-      string << key << params[key]
-    end
+    "#{uri}#{params.sort.flatten.join}"
   end
 
   def digest
@@ -38,6 +36,10 @@ class Quadhook::Verifier
   end
 
   def params
-    Rack::Utils.parse_query body
+    @params ||= begin
+      JSON.parse body
+    rescue JSON::ParserError
+      {}
+    end
   end
 end
