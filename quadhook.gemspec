@@ -13,4 +13,11 @@ Gem::Specification.new do |spec|
   spec.bindir        = "exe"
   spec.executables   = spec.files.grep(%r{^exe/}) { |f| File.basename(f) }
   spec.require_paths = ["lib"]
+
+  spec.add_runtime_dependency 'activesupport', '>= 3.1.0'
+  spec.add_runtime_dependency 'json',          '>= 1.8.0'
+  spec.add_runtime_dependency 'rack'
+
+  spec.add_development_dependency 'rack-test', '~> 0.6.3'
+  spec.add_development_dependency 'rspec',     '~> 3.2.0'
 end
